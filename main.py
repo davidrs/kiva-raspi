@@ -11,10 +11,20 @@ if RASPI:
     GPIO.setmode(GPIO.BCM)
 
 # interval in seconds between polls
-POLL_INTERVAL = 5 * 60
+POLL_INTERVAL = 1 * 60
 
 # Time LED is turned on in seconds.
 LED_ON_TIME = 3
+
+# region Gpio
+regionGpio = { 
+    'NorthAmerica': 2,
+    'SouthAmerica': 3,
+    'Africa': 4,
+    'MiddleEast': 14,
+    'EastAsia': 18
+}
+
 
 # country code to GPIO pin mapping
 countryGpio = { 
@@ -44,9 +54,9 @@ def scrapeLatest():
         #req = urllib2.Request('http://api.kivaws.org/v1/lending_actions/recent.json')
 	#resp = urllib2.urlopen(req).read()
         response = urllib2.urlopen('http://api.kivaws.org/v1/lending_actions/recent.json', None, 100)
-	#print response
         recentLoans = json.load(response)
         recentLoans = recentLoans['lending_actions']
+	print recentLoans
     except Exception as inst:
         print "Error on loan api call"
 	print type(inst)
@@ -96,7 +106,7 @@ def lightUpLoans(simpleList):
     for loan in reversed(simpleList):
         print loan['country'] +"   "+loan['date']
         lightUpCountry(loan['country'])
-        time.sleep(timePerLoan - LED_ON_TIME)
+        time.sleep(max(0,timePerLoan - LED_ON_TIME))
         
 
 def lightUpCountry(country):

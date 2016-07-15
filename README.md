@@ -4,11 +4,14 @@ RaspberryPi powered map that lights up in real time with loans
 ## Setup
 
 Put the pins in:
-North America
-South America
-Africa
-Middle East
-South Asia
+```
+# Reading the code in main.py is best to ensure up to date..
+PIN_NORTH_AMERICA = 2
+PIN_SOUTH_AMERICA = 3
+PIN_AFRICA = 4
+PIN_MIDDLE_EAST = 14
+PIN_EAST_ASIA = 18
+```
 
 Use a common ground.
 

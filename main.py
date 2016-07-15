@@ -1,4 +1,4 @@
-# debug flag turn on if running on Raspi
+# Debug flag set to True if running on Raspi else False
 RASPI = True
 
 import json
@@ -10,29 +10,60 @@ if RASPI:
     import RPi.GPIO as GPIO
     GPIO.setmode(GPIO.BCM)
 
-# interval in seconds between polls
+# Tnterval in seconds between polls
 POLL_INTERVAL = 1 * 60
 
 # Time LED is turned on in seconds.
 LED_ON_TIME = 3
 
-# region Gpio
-regionGpio = { 
-    'NorthAmerica': 2,
-    'SouthAmerica': 3,
-    'Africa': 4,
-    'MiddleEast': 14,
-    'EastAsia': 18
-}
+# region Gpio pins
+PIN_NORTH_AMERICA = 2
+PIN_SOUTH_AMERICA = 3
+PIN_AFRICA = 4
+PIN_MIDDLE_EAST = 14
+PIN_EAST_ASIA = 18
 
 
-# country code to GPIO pin mapping
+# country code to region mapping
 countryGpio = { 
-    'Peru': 2,
-    'Tajikistan': 3,
-    'Kenya': 4,
-    'Philippines': 14,
-    'El Salvador': 18,
+    'Albania': PIN_MIDDLE_EAST,
+    'Georgia': PIN_MIDDLE_EAST,
+    'Iran': PIN_MIDDLE_EAST,
+    'Jordan': PIN_MIDDLE_EAST,
+    'Kyrgyzstan': PIN_MIDDLE_EAST,
+    'Lebanon': PIN_MIDDLE_EAST,
+    'Moldova': PIN_MIDDLE_EAST,
+    'Tajikistan': PIN_MIDDLE_EAST,
+    'Yemen': PIN_MIDDLE_EAST,
+
+    'Cameroon': PIN_AFRICA,
+    'Egypt': PIN_AFRICA,
+    'Ghana': PIN_AFRICA,
+    'Kenya': PIN_AFRICA,
+    'Lesotho': PIN_AFRICA,
+    'Malawi': PIN_AFRICA,
+    'Mali': PIN_AFRICA,
+    'Mozambique': PIN_AFRICA,
+    'Nigeria': PIN_AFRICA,
+    'Rwanda': PIN_AFRICA,
+    'South Africa': PIN_AFRICA,
+    'Uganda': PIN_AFRICA,
+    'Zambia': PIN_AFRICA,
+
+    'Cambodia': PIN_EAST_ASIA,
+    'Myanmar (Burma)': PIN_EAST_ASIA,
+    'Philippines': PIN_EAST_ASIA,
+    'Timor-Leste': PIN_EAST_ASIA,
+
+    'Costa Rica': PIN_NORTH_AMERICA,
+    'Haiti': PIN_NORTH_AMERICA,
+
+    'Brazil': PIN_SOUTH_AMERICA,
+    'Ecuador': PIN_SOUTH_AMERICA,
+    'El Salvador': PIN_SOUTH_AMERICA,
+    'Guatemala': PIN_SOUTH_AMERICA,
+    'Mexico': PIN_SOUTH_AMERICA,
+    'Peru': PIN_SOUTH_AMERICA,
 }
 
 # start lastTime as now.
@@ -51,12 +82,10 @@ def initializePins():
 def scrapeLatest():
     global lastID
     try:
-        #req = urllib2.Request('http://api.kivaws.org/v1/lending_actions/recent.json')
-	#resp = urllib2.urlopen(req).read()
         response = urllib2.urlopen('http://api.kivaws.org/v1/lending_actions/recent.json', None, 100)
         recentLoans = json.load(response)
         recentLoans = recentLoans['lending_actions']
-	print recentLoans
+	    #print recentLoans
     except Exception as inst:
         print "Error on loan api call"
 	print type(inst)
@@ -71,6 +100,7 @@ def scrapeLatest():
         print "Old lastId " + str(lastID)
         filteredLoans = filterLoans(recentLoans)
         if len(filteredLoans) > 0:
+            # lightUpLoans is blocking so it won't return for aprox POLL_INTERVAL
             lightUpLoans(filteredLoans)
             lastID = recentLoans[0]['id']
         else :
@@ -83,28 +113,34 @@ def scrapeLatest():
 # iterate over loans, filtering out ones that don't apply.
 def filterLoans(loanList):
     simpleList = []
+
     for action in loanList:
         if action['id'] <= lastID:
             print "break, found old id"
             break
-        if lastID == 0 and len(simpleList) > 5:
+        if lastID == 0 and len(simpleList) > 8:
             print "Got enough for first round."
             break
+
         if action['loan']['location']['country'] in countryGpio:
             print "in list! "+ action['loan']['location']['country'] + "  "+ action['date']
             simpleList.append({'country': action['loan']['location']['country'] , 
             'date': action['date']})
+        else :
+            print "Missing region in code: " +  action['loan']['location']['country']
+
     
     return simpleList
 
-# take a list of loans, and light each one up.
+# Take a list of loans, and light each one up in order.
+# The function sleeps and is blocking.
 def lightUpLoans(simpleList):
     timePerLoan = POLL_INTERVAL / len(simpleList)
     print "timeperLoan: " + str(timePerLoan)
     
     # reverse list so it 'plays it forward in time'
     for loan in reversed(simpleList):
-        print loan['country'] +"   "+loan['date']
+        print loan['country'] + "   " +loan['date']
         lightUpCountry(loan['country'])
         time.sleep(max(0,timePerLoan - LED_ON_TIME))
         
@@ -124,5 +160,4 @@ def lightUpCountry(country):
 # start the app
 initializePins()
 scrapeLatest()
-
 

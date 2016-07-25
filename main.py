@@ -1,5 +1,5 @@
 # Debug flag set to True if running on Raspi else False
-RASPI = True
+RASPI = False
 
 import json
 import urllib2
@@ -81,7 +81,7 @@ def initializePins():
         for pin in ALL_PINS:
             GPIO.setup(pin, GPIO.OUT)
             GPIO.output(pin,True)
-            print('Turn on: ' + pin)
+            print('Turn on: ' + str(pin))
             time.sleep(2)
             GPIO.output(pin, False)
 
@@ -147,18 +147,17 @@ def lightUpLoans(simpleList):
     # reverse list so it 'plays it forward in time'
     for loan in reversed(simpleList):
         print loan['country'] + "   " +loan['date']
-        lightUpCountry(loan['country'])
+        lightUpCountry(loan['country'], timePerLoan)
         # sleep for gap inbetween countries
         time.sleep(max(0,timePerLoan - MAX_LED_ON_TIME))
         
 
-def lightUpCountry(country):
-    timePerLoan = POLL_INTERVAL / len(simpleList)
+def lightUpCountry(country, timePerLoan):
     print "gpio on "+  str(countryGpio[country])
     if RASPI:
         GPIO.output(countryGpio[country], True)
     
-    time.sleep(min(timePerLoan,MAX_LED_ON_TIME))
+    time.sleep(min(timePerLoan, MAX_LED_ON_TIME))
     
     print "gpio off "+  str(countryGpio[country])
     if RASPI:

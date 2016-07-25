@@ -23,6 +23,8 @@ PIN_AFRICA = 4
 PIN_MIDDLE_EAST = 14
 PIN_EAST_ASIA = 18
 
+ALL_PINS = [PIN_NORTH_AMERICA, PIN_SOUTH_AMERICA, PIN_AFRICA, PIN_MIDDLE_EAST, PIN_EAST_ASIA]
+
 
 # country code to region mapping
 countryGpio = { 
@@ -76,12 +78,12 @@ lastID = 0
 # Also turn them all on for a second then off, good for testing LEDs.
 def initializePins():
     if RASPI:
-        for country in countryGpio:
-            GPIO.setup(countryGpio[country], GPIO.OUT)
-            GPIO.output(countryGpio[country],True)
-            print('Turn on: ' + country)
-	        time.sleep(2)
-            GPIO.output(countryGpio[country], False)
+        for pin in ALL_PINS:
+            GPIO.setup(pin, GPIO.OUT)
+            GPIO.output(pin,True)
+            print('Turn on: ' + pin)
+            time.sleep(2)
+            GPIO.output(pin, False)
 
 def scrapeLatest():
     global lastID

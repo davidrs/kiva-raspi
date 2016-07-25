@@ -13,8 +13,8 @@ if RASPI:
 # Tnterval in seconds between polls
 POLL_INTERVAL = 1 * 60
 
-# Time LED is turned on in seconds.
-LED_ON_TIME = 3
+# Max Time LED is turned on in seconds.
+MAX_LED_ON_TIME = 3
 
 # region Gpio pins
 PIN_NORTH_AMERICA = 2
@@ -33,6 +33,7 @@ countryGpio = {
     'Kyrgyzstan': PIN_MIDDLE_EAST,
     'Lebanon': PIN_MIDDLE_EAST,
     'Moldova': PIN_MIDDLE_EAST,
+    'Pakistan': PIN_MIDDLE_EAST,
     'Tajikistan': PIN_MIDDLE_EAST,
     'Yemen': PIN_MIDDLE_EAST,
 
@@ -47,6 +48,7 @@ countryGpio = {
     'Nigeria': PIN_AFRICA,
     'Rwanda': PIN_AFRICA,
     'South Africa': PIN_AFRICA,
+    'Tanzania': PIN_AFRICA,
     'Uganda': PIN_AFRICA,
     'Zambia': PIN_AFRICA,
 
@@ -57,6 +59,7 @@ countryGpio = {
 
     'Costa Rica': PIN_NORTH_AMERICA,
     'Haiti': PIN_NORTH_AMERICA,
+    'Nicaragua': PIN_NORTH_AMERICA,
 
     'Brazil': PIN_SOUTH_AMERICA,
     'Ecuador': PIN_SOUTH_AMERICA,
@@ -76,7 +79,8 @@ def initializePins():
         for country in countryGpio:
             GPIO.setup(countryGpio[country], GPIO.OUT)
             GPIO.output(countryGpio[country],True)
-	    time.sleep(1)
+            print('Turn on: ' + country)
+	        time.sleep(2)
             GPIO.output(countryGpio[country], False)
 
 def scrapeLatest():
@@ -142,15 +146,17 @@ def lightUpLoans(simpleList):
     for loan in reversed(simpleList):
         print loan['country'] + "   " +loan['date']
         lightUpCountry(loan['country'])
-        time.sleep(max(0,timePerLoan - LED_ON_TIME))
+        # sleep for gap inbetween countries
+        time.sleep(max(0,timePerLoan - MAX_LED_ON_TIME))
         
 
 def lightUpCountry(country):
+    timePerLoan = POLL_INTERVAL / len(simpleList)
     print "gpio on "+  str(countryGpio[country])
     if RASPI:
         GPIO.output(countryGpio[country], True)
     
-    time.sleep(LED_ON_TIME)
+    time.sleep(min(timePerLoan,MAX_LED_ON_TIME))
     
     print "gpio off "+  str(countryGpio[country])
     if RASPI:

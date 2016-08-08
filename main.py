@@ -1,5 +1,5 @@
 # Debug flag set to True if running on Raspi else False
-RASPI = False
+RASPI = True
 
 import json
 import urllib2
@@ -19,9 +19,9 @@ MAX_LED_ON_TIME = 3
 # region Gpio pins
 PIN_NORTH_AMERICA = 2
 PIN_SOUTH_AMERICA = 3
-PIN_AFRICA = 4
-PIN_MIDDLE_EAST = 14
-PIN_EAST_ASIA = 18
+PIN_AFRICA = 18
+PIN_MIDDLE_EAST = 4
+PIN_EAST_ASIA = 14
 
 ALL_PINS = [PIN_NORTH_AMERICA, PIN_SOUTH_AMERICA, PIN_AFRICA, PIN_MIDDLE_EAST, PIN_EAST_ASIA]
 
